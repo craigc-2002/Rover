@@ -108,10 +108,6 @@ int main()
                 }
                 break;
             }
-            default:{
-                rover.rgb(0, 0, 0);
-                break;
-            }
         }
 
         wait_us(1000);
