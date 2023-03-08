@@ -1,0 +1,3 @@
+[submodule "HC-SR04"]
+	path = HC-SR04
+	url = https://github.com/craigc-2002/HC-SR04_mbed_lib
