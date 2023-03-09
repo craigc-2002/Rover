@@ -8,7 +8,7 @@ class Rover{
         Rover(PinName L1, PinName L2, PinName EnL, PinName R1, PinName R2, PinName EnR);  // Constructor method
         ~Rover(void); // Destructor method
 
-        // Methods to control rover motors
+        // Basic methods to control rover's motors
         void stop(void); // Method to stop the rover
         void free(void); // Method to let rover roll
         void resume(void); // Method to write the stored duty cycles to each PWM enable output
