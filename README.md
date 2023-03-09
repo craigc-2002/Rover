@@ -19,9 +19,8 @@ Obstacles in the path of the rover are detected using an HC-SR04 ultrasonic sens
 This is interfaced with using the [HC-SR04_mbed_lib](https://github.com/craigc-2002/HC-SR04_mbed_lib).
 
 # Using the code
-`main.cpp` contains driver code that moves the rover forward until an obstacle is detected less than 35cm in front of the rover.
-The rover begins an obstacle avoidance routine which drives in a square around the obstacle.
-Line following is not yet implemented.
+`main.cpp` contains driver code that follows a line on the ground.
+Obstacle detection is not implemented in this program.
 
 ## Building in Keil Studio
 To build or edit the code, clone this repository into a new project in Keil Studio (File > Clone > enter `https://github.com/craigc-2002/Rover`).
