@@ -11,8 +11,8 @@ Control of the rover motors is implemented in `rover.cpp` and `rover.h`.
 An infrared sensor is used to detect the line. This outputs a low signal when the line is detected.
 3 sensors are used, one on the left, centre and right. The readings from these sensors are used to dertemine whether the rover needs to turn left or right.
 When the line is detected in the centre, then the rover can speed up.
-The sensor has to be mounted close to the line for it to be detected.
-Line sensing is not yet implemented.
+
+Note: The sensor has to be mounted very close to the line for it to be detected.
 
 ## Obstacle Avoidance
 Obstacles in the path of the rover are detected using an HC-SR04 ultrasonic sensor.
