@@ -28,28 +28,35 @@ int main()
             case Status::normal:{
                 // if the rover is in normal operation, move along the line
                 rover.rgb(1, 0, 1);
-                printf("On line\n");
+                //printf("%d\n",int(line_direction));
 
                 switch (line_direction){
                     case LineSensor::Forward:{
+                        printf("forward\n");
+                        rover.rgb(1,0,1);
                         rover.En_duty_set(forward_duty_cycle_slow, forward_duty_cycle_slow);
                         rover.forward();
                         break;
                     }
                     case LineSensor::Fast:{
+                        printf("fast\n");
                         rover.En_duty_set(forward_duty_cycle_fast, forward_duty_cycle_fast);
                         rover.forward();
                         break;
                     }
                     case LineSensor::Left:{
+                        printf("left\n");
                         rover.anticlockwise();
                         break;
                     }
                     case LineSensor::Right:{
+                        printf("right\n");
                         rover.clockwise();
                         break;
                     }
                     case LineSensor::Stop:{
+                        printf("stop\n");
+                        rover.rgb(0,1,1);
                         rover.stop();
                         break;
                     }

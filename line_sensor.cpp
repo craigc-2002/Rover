@@ -6,6 +6,12 @@ LineSensor::LineSensor(PinName left, PinName centre, PinName right){
     centre_sensor = new DigitalIn(centre);
     left_sensor = new DigitalIn(left);
     right_sensor = new DigitalIn(right);
+
+    // Configure each input with an internal pullup resistor
+    //  inputs will show no line if sensor is disconnected
+    centre_sensor->mode(PullUp);
+    left_sensor->mode(PullUp);
+    right_sensor->mode(PullUp);
 }
 
 LineSensor::~LineSensor(){
@@ -24,12 +30,16 @@ int LineSensor::check_line_sensors(){
     */
 
     // check each of the sensors for the line
-    // Sensor returns HIGH for no line, LOW for line detected so the DigitalIn values are inverted
-    line_left = ~left_sensor->read();
-    line_centre = ~centre_sensor->read();
-    line_right = ~right_sensor->read();
+    // Sensor returns 1 for no line, 0 for line detected
+    line_left = left_sensor->read();
+    line_centre = centre_sensor->read();
+    line_right = right_sensor->read();
 
+    // Concatenate the sensor data into a single integer
     int sensor_data = (line_left<<2) + (line_centre<<1) + line_right;
+
+    // Bitwise inversion of bottom 3 bits so that a 1 represents line detected and 0 no line
+    sensor_data = sensor_data ^ 0b111;
     return sensor_data;
 }
 
@@ -40,11 +50,12 @@ LineSensor::Direction LineSensor::get_direction(){
 
     If the line is detected on the left or right sensor, the rover will move in that direction
     If the line is detected by the centre sensor only, the rover will speed up
-    If the line is not detected the rover will move forward 
+    If the line is not detected the rover will stop 
     */
     
-    LineSensor::Direction direction{LineSensor::Forward};
+    LineSensor::Direction direction{LineSensor::Stop};
     int sensor_data{check_line_sensors()};
+    printf("%d\n",sensor_data);
 
     if ((sensor_data & 0b100)==0b100){
         // If line detected by left sensor
@@ -53,8 +64,8 @@ LineSensor::Direction LineSensor::get_direction(){
         // If line detected by right sensor
         direction = LineSensor::Right;
     }else if (sensor_data == 0b010){
-        // If line only detected by middle sensor
-        direction = LineSensor::Fast;
+        // If line *only* detected by middle sensor
+        direction = LineSensor::Forward;
     }
 
     return direction;
