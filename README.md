@@ -25,7 +25,7 @@ Line following is not implemented in this program.
 ## Building in Keil Studio
 - To build or edit the code, clone this repository into a new project in Keil Studio (File > Clone > enter `https://github.com/craigc-2002/Rover`).
 - Add the mbed-os library to the project (Right Click > add Mbed Library > enter `https://github.com/ARMmbed/mbed-os` > select version 6.15.1).
-- Delete the HC-SR04 folder and add the HC-SR04_mbed_lib to the project (Right Click > add Mbed Library > enter `https://github.com/craigc-2002/HC-SR04_mbed_lib` > select v0.0.1).
+- Add the HC-SR04_mbed_lib to the project (Right Click > add Mbed Library > enter `https://github.com/craigc-2002/HC-SR04_mbed_lib` > select v0.0.1).
 - Select `FRDM-KL25Z` as tartget hardware.
 
 The code is now ready to be built and edited.
