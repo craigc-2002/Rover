@@ -9,10 +9,6 @@ class LineSensor{
         DigitalIn* left_sensor;
         DigitalIn* right_sensor;
 
-        bool line_centre;
-        bool line_left;
-        bool line_right;
-
     public:
         enum Direction{Forward, Left, Right, Fast, Stop};
 

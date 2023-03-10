@@ -31,9 +31,9 @@ int LineSensor::check_line_sensors(){
 
     // check each of the sensors for the line
     // Sensor returns 1 for no line, 0 for line detected
-    line_left = left_sensor->read();
-    line_centre = centre_sensor->read();
-    line_right = right_sensor->read();
+    bool line_left {bool(left_sensor->read())};
+    bool line_centre {bool(centre_sensor->read())};
+    bool line_right {bool(right_sensor->read())};
 
     // Concatenate the sensor data into a single integer
     int sensor_data = (line_left<<2) + (line_centre<<1) + line_right;
