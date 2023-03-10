@@ -57,20 +57,21 @@ LineSensor::Direction LineSensor::get_direction(){
     int sensor_data{check_line_sensors()};
     printf("%d\n",sensor_data);
 
+    if ((sensor_data & 0b010)==0b010){
+        // If line detected by middle sensor
+	    direction = LineSensor::Forward;    
+    	if (sensor_data == 0b010){
+            // If line *only* detected by middle sensor
+            direction = LineSensor::Fast;
+    	}
+    }
+    
     if ((sensor_data & 0b100)==0b100){
         // If line detected by left sensor
         direction = LineSensor::Left;
     }else if ((sensor_data & 0b001)==0b001){
         // If line detected by right sensor
         direction = LineSensor::Right;
-    }
-
-    if ((sensor_data & 0b010)==0b010){
-	direction = LineSensor::Forward;    
-    	if (sensor_data == 0b010){
-            // If line *only* detected by middle sensor
-            direction = LineSensor::Fast;
-    	}
     }
 
     return direction;
