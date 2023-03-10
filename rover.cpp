@@ -58,8 +58,14 @@ void Rover::resume(void){
 
 void Rover::En_duty_set(float leftDuty_new, float rightDuty_new){
     // Method to set the PWM pulse width of the left and right motors
-    leftDuty = leftDuty_new / 100;
-    rightDuty = rightDuty_new / 100;
+    if (leftDuty != leftDuty_new){
+        leftDuty = leftDuty_new / 100;
+    }
+
+    if (rightDuty != rightDuty_new){
+	rightDuty = rightDuty_new / 100;
+    }
+    
     resume();
 }
 
