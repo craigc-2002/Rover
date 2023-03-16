@@ -4,7 +4,7 @@
 #include "rover.h"
 #include "hc-sr04.h"
 
-Rover rover(PTC9, PTA5, PTA12, PTA4, PTD4, PTC8);
+Rover rover(PTD4, PTA4, PTA12, PTC8, PTC9, PTA5);
 HCSR04 distance_sensor(PTD5, PTA13);
 
 DigitalOut obs_LED(PTD0);
