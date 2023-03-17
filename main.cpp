@@ -1,98 +1,103 @@
-#include "mbed.h"
-// Program to demonstrate basic obstacle detection and avoidance
+// RoverLineFollowing - main.cpp
+//  Craig Cochrane
+//  Program to demonstrate line following
 
+#include "mbed.h"
 #include "rover.h"
-#include "hc-sr04.h"
+#include "line_sensor.h"
 
 Rover rover(PTD4, PTA4, PTA12, PTC8, PTC9, PTA5);
-HCSR04 distance_sensor(PTD5, PTA13);
+LineSensor line(PTC2, PTB3, PTB2);
 
-DigitalOut obs_LED(PTD0);
+Timer off_line_timer;
 
-const int forward_duty_cycle{20};
+const int forward_duty_cycle_slow{20};
+const int forward_duty_cycle_fast{40};
 
-enum class Status{normal, obstacle_manouvre, error=-1};
+enum class Status{normal, line_searching, error=-1};
 Status rover_status{Status::normal};
-
-
-// ---------- Functions to control the rover ----------
-void anticlockwise_90(void){
-    // function to turn the rover 90 degrees anticlockwise
-    rover.En_duty_set(100, 100);
-    rover.anticlockwise();
-    wait_us(450000);
-    rover.stop();
-    wait_us(500000);
-    rover.En_duty_set(forward_duty_cycle, forward_duty_cycle);
-}
-
-void clockwise_90(void){
-    // function to turn the rover 90 degrees clockwise
-    rover.En_duty_set(100, 100);
-    rover.clockwise();
-    wait_us(450000);
-    rover.stop();
-    wait_us(500000);
-    rover.En_duty_set(forward_duty_cycle, forward_duty_cycle);
-}
-
-void forward_1s(){
-    // function to move the rover forward for 1 second
-    rover.forward();
-    wait_us(1000000);
-    rover.stop();
-    wait_us(500000);
-}
-
-void obstacle_avoidance_routine(){
-    // function to manouvre rover around an obstacle
-    rover.stop();
-    wait_us(500000);
-    rover.resume();
-    anticlockwise_90();
-    forward_1s();
-    clockwise_90();
-    forward_1s();
-    clockwise_90();
-    forward_1s();
-    anticlockwise_90();
-}
-// ---------------------------------------------
-
-
 
 // ---------- Main rover control loop ----------
 int main()
 {
-    rover.rgb(0, 0, 0);
-    wait_us(1000000);
-
     while (true) {
-        // measure distance to obstacle using the ultrasonic sensor
-        float distance = distance_sensor.get_distance();
-        printf("Obstacle distance: %f m\n", distance);
+        // Find the direction of the line
+        LineSensor::Direction line_direction{line.get_direction()};
 
-        // if obstacle 35cm or less from rover
-        if (distance <= 0.35){
-            rover_status = Status::obstacle_manouvre;
-            obs_LED = 1;
+        /*
+        Use line measurements to determine the status of the rover
+
+        Rover status changed to line_searching if a line hasn't been detected for 2 seconds
+        */
+
+
+        // Update the rover status
+        //rover_status = Status::normal;
+        
+        if (line_direction == LineSensor::Lost){
+            off_line_timer.start();
+            int time_us = off_line_timer.elapsed_time().count();
+            if (time_us >= 2000000){
+                rover_status = Status::line_searching;
+            }
         }else{
+            off_line_timer.stop();
+            off_line_timer.reset();
             rover_status = Status::normal;
-            obs_LED = 0;
         }
+
 
         // command the rover based on the current status
         switch (rover_status){
             case Status::normal:{
-                // if the rover is in normal operation, move in a straight line
+                // if the rover is in normal operation, move along the line
                 rover.rgb(1, 0, 1);
-                rover.forward();
+
+                switch (line_direction){
+                    case LineSensor::Forward:{
+                        //printf("forward\n");
+                        rover.En_duty_set(forward_duty_cycle_slow, forward_duty_cycle_slow);
+                        rover.forward();
+                        break;
+                    }
+                    case LineSensor::Fast:{
+                        //printf("fast\n");
+                        rover.En_duty_set(forward_duty_cycle_fast, forward_duty_cycle_fast);
+                        rover.forward();
+                        break;
+                    }
+                    case LineSensor::Left:{
+                        //printf("left\n");
+                        rover.stop();
+                        rover.En_duty_set(forward_duty_cycle_fast, forward_duty_cycle_fast);
+                        rover.anticlockwise();
+                        break;
+                    }
+                    case LineSensor::Right:{
+                        //printf("right\n");
+                        rover.stop();
+                        rover.En_duty_set(forward_duty_cycle_fast, forward_duty_cycle_fast);
+                        rover.clockwise();
+                        break;
+                    }
+                    case LineSensor::Stop:{
+                        //printf("stop\n");
+                        rover.rgb(0,1,1);
+                        rover.stop();
+                        break;
+                    }
+                    case LineSensor::Lost:{
+                        rover.rgb(0, 1, 1);
+                        break;
+                    }
+                }
                 break;
             }
-            case Status::obstacle_manouvre:{
-                // if the rover has detected an obstacle, manouvre around it
+            case Status::line_searching:{
+                // if the rover is searching for the line, move straight backwards until it's found
                 rover.rgb(0, 0, 1);
-                obstacle_avoidance_routine();
+                rover.stop();
+                rover.reverse();
                 break;
             }
             case Status::error:{
@@ -100,10 +105,8 @@ int main()
                 rover.stop();
                 while (1){
                     rover.rgb(0, 1, 1);
-                    obs_LED = 1;
                     wait_us(1000000);
                     rover.rgb(1, 1, 1);
-                    obs_LED = 0;
                     wait_us(1000000);
                 }
                 break;
@@ -111,6 +114,7 @@ int main()
         }
 
         wait_us(1000);
-    }      
+    }
+    return 0;   
 }
 // ---------------------------------------------
