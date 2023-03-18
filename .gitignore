@@ -41,3 +41,4 @@ BUILD
 compile_commands.json
 .clangd
 .cache
+hc-sr04
