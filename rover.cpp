@@ -1,6 +1,6 @@
 #include "mbed.h"
 #include "rover.h"
-#include "line_sesnor.h"
+#include "line_sensor.h"
 
 Rover::Rover(PinName L1, PinName L2, PinName EnL, PinName R1, PinName R2, PinName EnR){
     // Constructor method
