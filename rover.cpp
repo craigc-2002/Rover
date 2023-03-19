@@ -118,3 +118,65 @@ void Rover::anticlockwise(void){
     Right1 -> write(1);
     Right2 -> write(0);
 }
+
+void Rover::anticlockwise_90(void){
+    // function to turn the rover 90 degrees anticlockwise
+    this->write_En_PWM(100, 100);
+    this->anticlockwise();
+    wait_us(420000);
+    this->stop();
+    wait_us(500000);
+    this->resume();
+}
+
+void Rover::clockwise_90(void){
+    // function to turn the rover 90 degrees clockwise
+    this->write_En_PWM(100, 100);
+    this->clockwise();
+    wait_us(420000);
+    this->stop();
+    wait_us(500000);
+    this->resume();
+}
+
+void Rover::forward_t(int time_us){
+    // function to move the rover forward for 1.5 seconds
+    this->forward();
+    wait_us(time_us);
+    this->stop();
+    wait_us(500000);
+}
+
+void Rover::follow_direction(LineSensor::Direction line_direction){
+    switch (line_direction){
+        case LineSensor::Forward:{
+            this->forward();
+            break;
+        }
+        case LineSensor::Fast:{
+            this->forward();
+            break;
+        }
+        case LineSensor::Left:{
+            this->stop();
+            wait_us(500000);
+            this->anticlockwise();
+            break;
+        }
+        case LineSensor::Right:{
+            this->stop();
+            wait_us(500000);
+            this->clockwise();
+            break;
+        }
+        case LineSensor::Stop:{
+            this->rgb(0,1,1);
+            this->stop();
+            break;
+        }
+        case LineSensor::Lost:{
+            this->rgb(0, 1, 1);
+            break;
+        }
+    }
+}

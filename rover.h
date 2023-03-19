@@ -2,6 +2,7 @@
 #define ROVER_H
 
 #include "mbed.h"
+#include "line_sensor.h"
 
 class Rover{
     public:
@@ -16,6 +17,12 @@ class Rover{
         void reverse(void); // Method to reverse both sets of wheels
         void clockwise(void); // Method to run left wheels forward and right in reverse
         void anticlockwise(void); // Method to run left wheels in reverse and right forward
+
+        void anticlockwise_90(); // Method to turn the rover 90 degrees anticlockwise
+        void clockwise_90(); // Method to turn the rover 90 degrees clockwise
+        void forward_t(int time_us); // Method to move the rover forward for a set length of time
+
+        void follow_direction(LineSensor::Direction line_direction); // Method to make the rover move in a direction given by the line sensors
 
         void En_duty_set(float leftDuty_new, float rightDuty_new); // Method to set the duty cycle of both motor En pins
         void rgb(int red, int green, int blue); // Method to set the colour of the on-board rgb LED. Sending a 0 turns the LED on
