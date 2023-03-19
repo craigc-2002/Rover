@@ -1,5 +1,6 @@
 #include "mbed.h"
 #include "rover.h"
+#include "line_sesnor.h"
 
 Rover::Rover(PinName L1, PinName L2, PinName EnL, PinName R1, PinName R2, PinName EnR){
     // Constructor method
@@ -120,7 +121,7 @@ void Rover::anticlockwise(void){
 }
 
 void Rover::anticlockwise_90(void){
-    // function to turn the rover 90 degrees anticlockwise
+    // method to turn the rover 90 degrees anticlockwise
     this->write_En_PWM(100, 100);
     this->anticlockwise();
     wait_us(420000);
@@ -130,7 +131,7 @@ void Rover::anticlockwise_90(void){
 }
 
 void Rover::clockwise_90(void){
-    // function to turn the rover 90 degrees clockwise
+    // method to turn the rover 90 degrees clockwise
     this->write_En_PWM(100, 100);
     this->clockwise();
     wait_us(420000);
@@ -140,7 +141,7 @@ void Rover::clockwise_90(void){
 }
 
 void Rover::forward_t(int time_us){
-    // function to move the rover forward for 1.5 seconds
+    // method to move the rover forward for 1.5 seconds
     this->forward();
     wait_us(time_us);
     this->stop();
@@ -148,6 +149,13 @@ void Rover::forward_t(int time_us){
 }
 
 void Rover::follow_direction(LineSensor::Direction line_direction){
+    // method to make the rover move in a direction given by line sensors
+    if (line_direction != current_direction){
+	this -> stop();
+	wait_us(500000);
+    }
+    current_direction = line_direction;
+
     switch (line_direction){
         case LineSensor::Forward:{
             this->forward();
@@ -158,14 +166,10 @@ void Rover::follow_direction(LineSensor::Direction line_direction){
             break;
         }
         case LineSensor::Left:{
-            this->stop();
-            wait_us(500000);
             this->anticlockwise();
             break;
         }
         case LineSensor::Right:{
-            this->stop();
-            wait_us(500000);
             this->clockwise();
             break;
         }

@@ -47,6 +47,8 @@ class Rover{
         float leftDuty;
         float rightDuty;
 
+	LineSensor::Direction current_direction{LineSensor::Stop};
+
         void write_En_PWM(float leftDuty_new, float rightDuty_new); // Method to write values to PWM enable outputs without changing stored values
 };
 
