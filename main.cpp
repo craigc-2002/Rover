@@ -12,8 +12,10 @@ Follows a line on the ground and avoids obstacles
 
 Rover rover(PTD4, PTA4, PTA12, PTC8, PTC9, PTA5);
 LineSensor line(PTC2, PTB3, PTB2);
-HCSR04 distance_sensor(PTD5, PTA13);
-DigitalOut obstacle_LED(PTD0);
+HCSR04 forward_obstacle_sensor(PTD5, PTA13);
+HCSR04 side_obstacle_sensor(PTD3, PTA2);
+DigitalOut forward_obstacle_LED(PTD0);
+DigitalOut side_obstacle_LED(PTD1);
 
 Timer off_line_timer;
 
@@ -25,16 +27,32 @@ Status rover_status{Status::normal};
 
 // ---------- Function to manouvre rover around obstacle ----------
 void obstacle_avoidance_routine(){
+    // stop the rover and turn 90 degrees anticlockwise
     rover.stop();
     wait_us(500000);
     rover.resume();
     rover.anticlockwise_90();
-    rover.forward_t(2000000);
-    rover.clockwise_90();
-    rover.forward_t(2000000);
-    rover.clockwise_90();
-    rover.forward_t(2000000);
-    rover.anticlockwise_90();
+
+    bool obstacle_cleared{false};
+
+    while (!obstacle_cleared){
+        /* while not past the obstacle 
+            obstacle is assumed to be cleared when the line is found again*/
+        if(side_obstacle_sensor.get_distance() <= 0.4){
+            // if obstacle 40cm or less from rover
+            rover.forward();
+            side_obstacle_LED.write(1);
+        }else{
+            rover.clockwise();
+            side_obstacle_LED.write(0);
+        }
+
+        if (line.get_direction() != LineSensor::Lost){
+            obstacle_cleared = true;
+        }
+    }
+
+    side_obstacle_LED.write(0);
 }
 
 // ---------- Main rover control loop ----------
@@ -44,7 +62,7 @@ int main()
         // Find the direction of the line
         LineSensor::Direction line_direction{line.get_direction()};
         // measure distance to obstacle using the ultrasonic sensor
-        float distance = distance_sensor.get_distance();
+        float distance = forward_obstacle_sensor.get_distance();
 
         /*
         Use line and obstacle distance measurements to determine the status of the rover
@@ -68,9 +86,9 @@ int main()
         // if obstacle 40cm or less from rover
         if (distance <= 0.4){
             rover_status = Status::obstacle_manouvre;
-            obstacle_LED = 1;
+            forward_obstacle_LED = 1;
         }else{
-            obstacle_LED = 0;
+            forward_obstacle_LED = 0;
         }
 
 
@@ -107,10 +125,10 @@ int main()
                 rover.stop();
                 while (1){
                     rover.rgb(0, 1, 1);
-                    obstacle_LED = 1;
+                    forward_obstacle_LED = 1;
                     wait_us(1000000);
                     rover.rgb(1, 1, 1);
-                    obstacle_LED = 0;
+                    forward_obstacle_LED = 0;
                     wait_us(1000000);
                 }
                 break;
