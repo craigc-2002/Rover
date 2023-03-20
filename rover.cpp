@@ -48,6 +48,9 @@ void Rover::rgb(int red, int green, int blue){
 
 void Rover::write_En_PWM(float leftDuty_new, float rightDuty_new){
     // Method to write values to PWM enable outputs without changing stored values
+    leftDuty_new /= 100;
+    rightDuty_new /= 100;
+    
     EnLeft -> write(leftDuty_new);
     EnRight -> write(rightDuty_new);
 }
