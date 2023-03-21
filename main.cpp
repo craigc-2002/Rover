@@ -123,14 +123,17 @@ int main()
             case Status::error:{
                 // if the system is in an error state, stop the rover and flash the LED red
                 rover.stop();
-                while (1){
+                for (int i{0}; i<3; i++){
                     rover.rgb(0, 1, 1);
                     forward_obstacle_LED = 1;
+                    side_obstacle_LED = 1;
                     wait_us(1000000);
                     rover.rgb(1, 1, 1);
                     forward_obstacle_LED = 0;
+                    side_obstacle_LED = 0;
                     wait_us(1000000);
                 }
+                NVIC_SystemReset();
                 break;
             }
         }
