@@ -79,6 +79,10 @@ void Rover::En_duty_set(float leftDuty_new, float rightDuty_new){
     }
 }
 
+LineSensor::Direction Rover::get_current_direction(void){
+    return current_direction;
+}
+
 void Rover::stop(void){
     // Method to stop driving the motor's wheels
     write_En_PWM(1, 1);
@@ -160,9 +164,9 @@ void Rover::forward_t(int time_us){
 void Rover::follow_direction(LineSensor::Direction line_direction){
     // method to make the rover move in a direction given by line sensors
     if (line_direction != current_direction){
-	this -> stop();
-	wait_us(500000);
-    this -> resume();
+        this -> stop();
+        wait_us(500000);
+        this -> resume();
     }
     current_direction = line_direction;
 
