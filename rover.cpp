@@ -62,15 +62,21 @@ void Rover::resume(void){
 
 void Rover::En_duty_set(float leftDuty_new, float rightDuty_new){
     // Method to set the PWM pulse width of the left and right motors
+    bool changed{false};
+
     if (leftDuty != leftDuty_new){
-        leftDuty = leftDuty_new / 100;
+        leftDuty = leftDuty_new;
+        changed = true;
     }
 
     if (rightDuty != rightDuty_new){
-	rightDuty = rightDuty_new / 100;
+	    rightDuty = rightDuty_new;
+        changed = true;
     }
-    
-    resume();
+
+    if (changed){
+        resume();
+    }
 }
 
 void Rover::stop(void){
@@ -156,6 +162,7 @@ void Rover::follow_direction(LineSensor::Direction line_direction){
     if (line_direction != current_direction){
 	this -> stop();
 	wait_us(500000);
+    this -> resume();
     }
     current_direction = line_direction;
 
@@ -177,12 +184,12 @@ void Rover::follow_direction(LineSensor::Direction line_direction){
             break;
         }
         case LineSensor::Stop:{
-            this->rgb(0,1,1);
+            this->rgb(0, 1, 1);
             this->stop();
             break;
         }
         case LineSensor::Lost:{
-            this->rgb(0, 1, 1);
+            this->rgb(0, 1, 0);
             break;
         }
     }
