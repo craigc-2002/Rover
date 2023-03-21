@@ -85,7 +85,7 @@ LineSensor::Direction Rover::get_current_direction(void){
 
 void Rover::stop(void){
     // Method to stop driving the motor's wheels
-    write_En_PWM(1, 1);
+    write_En_PWM(100, 100);
     Left1 -> write(0);
     Left2 -> write(0);
     Right1 -> write(0);
