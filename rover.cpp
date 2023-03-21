@@ -171,10 +171,6 @@ void Rover::follow_direction(LineSensor::Direction line_direction){
             this->forward();
             break;
         }
-        case LineSensor::Fast:{
-            this->forward();
-            break;
-        }
         case LineSensor::Left:{
             this->anticlockwise();
             break;

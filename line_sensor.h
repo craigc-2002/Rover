@@ -10,7 +10,7 @@ class LineSensor{
         DigitalIn* right_sensor;
 
     public:
-        enum Direction{Forward, Left, Right, Fast, Stop, Lost};
+        enum Direction{Forward, Left, Right, Stop, Lost};
 
         LineSensor(PinName left, PinName centre, PinName right);
         ~LineSensor();

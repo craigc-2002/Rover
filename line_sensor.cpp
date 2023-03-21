@@ -68,11 +68,7 @@ LineSensor::Direction LineSensor::get_direction(){
 
     if ((sensor_data & 0b010)==0b010){
         // If line detected by middle sensor
-	    direction = LineSensor::Forward;    
-    	if (sensor_data == 0b010){
-            // If line *only* detected by middle sensor
-            direction = LineSensor::Fast;
-    	}
+	    direction = LineSensor::Forward;
     }
 
     return direction;
