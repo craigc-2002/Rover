@@ -9,18 +9,19 @@ Follows a line on the ground and avoids obstacles
 #include "rover.h"
 #include "line_sensor.h"
 #include "hc-sr04.h"
+#include "clap_switch.h"
 
 Rover rover(PTC9, PTC8, PTA12, PTA4, PTD4, PTA5);
 
 LineSensor line(PTB2, PTB1, PTB0);
+
+ClapSwitch clap(PTA1);
 
 HCSR04 forward_obstacle_sensor(PTD5, PTA13);
 HCSR04 side_obstacle_sensor(PTD3, PTA2);
 
 DigitalOut forward_obstacle_LED(PTD0);
 DigitalOut side_obstacle_LED(PTD1);
-
-int duty_cycle;
 
 Timer off_line_timer;
 
@@ -65,6 +66,17 @@ void obstacle_avoidance_routine(){
 
 // ---------- Main rover control loop ----------
 int main(){
+    int i{1};
+
+    while(!clap.clap_received()){
+        rover.rgb(0, 1, 0);
+        wait_us(500000);
+        rover.rgb(1, 1, 1);
+        wait_us(500000);
+    }
+    // wait until a clap is received to start the main line following routine
+    // loop through, maybe change led colour
+    
     while (true) {
         // Find the direction of the line
         LineSensor::Direction line_direction{line.get_direction()};
