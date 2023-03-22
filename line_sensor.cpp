@@ -56,7 +56,6 @@ LineSensor::Direction LineSensor::get_direction(){
     LineSensor::Direction direction{LineSensor::Lost};
 
     int sensor_data{check_line_sensors()};
-    printf("%d", sensor_data);
 
     if ((sensor_data & 0b100)==0b100){
         // If line detected by left sensor
