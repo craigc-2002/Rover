@@ -85,6 +85,7 @@ LineSensor::Direction Rover::get_current_direction(void){
 
 void Rover::stop(void){
     // Method to stop driving the motor's wheels
+    this->rgb(0, 1, 1);
     write_En_PWM(100, 100);
     Left1 -> write(0);
     Left2 -> write(0);
@@ -163,11 +164,6 @@ void Rover::forward_t(int time_us){
 
 void Rover::follow_direction(LineSensor::Direction line_direction){
     // method to make the rover move in a direction given by line sensors
-    if (line_direction != current_direction){
-        this -> stop();
-        wait_us(500000);
-        this -> resume();
-    }
     current_direction = line_direction;
 
     switch (line_direction){

@@ -10,10 +10,13 @@ Follows a line on the ground and avoids obstacles
 #include "line_sensor.h"
 #include "hc-sr04.h"
 
-Rover rover(PTD4, PTA4, PTA12, PTC8, PTC9, PTA5);
+Rover rover(PTC9, PTC8, PTA12, PTA4, PTD4, PTA5);
+
 LineSensor line(PTB2, PTB1, PTB0);
+
 HCSR04 forward_obstacle_sensor(PTD5, PTA13);
 HCSR04 side_obstacle_sensor(PTD3, PTA2);
+
 DigitalOut forward_obstacle_LED(PTD0);
 DigitalOut side_obstacle_LED(PTD1);
 
@@ -21,9 +24,11 @@ int duty_cycle;
 
 Timer off_line_timer;
 
-const int duty_cycle_slow{15};
-const int duty_cycle_med{20};
-const int duty_cycle_fast{30};
+// enable pin duty cycle values
+const int duty_cycle_slow{20};
+const int duty_cycle_cruise{25};
+const int duty_cycle_med{50};
+const int duty_cycle_fast{60};
 
 enum class Status{normal, obstacle_manouvre, line_searching, error=-1};
 Status rover_status{Status::normal};
@@ -59,8 +64,7 @@ void obstacle_avoidance_routine(){
 }
 
 // ---------- Main rover control loop ----------
-int main()
-{
+int main(){
     while (true) {
         // Find the direction of the line
         LineSensor::Direction line_direction{line.get_direction()};
@@ -68,7 +72,7 @@ int main()
         bool direction_changed{false};
 
         // measure distance to obstacle using the ultrasonic sensor
-        float distance = forward_obstacle_sensor.get_distance();
+        //float distance = forward_obstacle_sensor.get_distance();
 
         /*
         Use line and obstacle distance measurements to determine the status of the rover
@@ -80,7 +84,7 @@ int main()
         if (line_direction == LineSensor::Lost){
             off_line_timer.start();
             int time_us = off_line_timer.elapsed_time().count();
-            if (time_us >= 3000000){
+            if (time_us >= 5000000){
                 rover_status = Status::line_searching;
             }else{
                 rover_status = Status::normal;
@@ -98,12 +102,12 @@ int main()
         }
 
         // if obstacle 40cm or less from rover
-        if (distance <= 0.4){
+        /*if (distance <= 0.4){
             rover_status = Status::obstacle_manouvre;
             forward_obstacle_LED = 1;
         }else{
             forward_obstacle_LED = 0;
-        }
+        }*/
 
         // command the rover based on the current status
         switch (rover_status){
@@ -124,18 +128,18 @@ int main()
 
                 if (rover_direction == LineSensor::Forward and !direction_changed){
                     // if rover is moving forward and hasn't just changed
-                    duty_left = duty_right = duty_cycle_med;
+                    duty_left = duty_right = duty_cycle_cruise;
                 }
 
-                if (line_direction == LineSensor::Lost){
+                if (line_direction == LineSensor::Lost and rover_direction == LineSensor::Forward){
                     // if the line is not detected
                     duty_left = duty_right = duty_cycle_slow;
                 }
 
                 if (rover_direction == LineSensor::Left){
-                    duty_left = 0;
+                    duty_left = duty_cycle_med;
                 }else if (rover_direction == LineSensor::Right){
-                    duty_right = 0;
+                    duty_right = duty_cycle_med;
                 }
 
     
@@ -154,7 +158,7 @@ int main()
                 // if the rover is searching for the line, move straight backwards until it's found
                 rover.rgb(0, 0, 1);
                 rover.stop();
-                rover.En_duty_set(duty_cycle_med, duty_cycle_med);
+                rover.En_duty_set(duty_cycle_slow, duty_cycle_slow);
                 rover.reverse();
                 break;
             }
@@ -175,7 +179,6 @@ int main()
                 break;
             }
         }
-        //wait_us(5000);
     }
     return 0;   
 }
