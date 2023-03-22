@@ -18,7 +18,7 @@ LineSensor line(PTB2, PTB1, PTB0);
 ClapSwitch clap(PTA1);
 
 HCSR04 forward_obstacle_sensor(PTD5, PTA13);
-HCSR04 side_obstacle_sensor(PTD3, PTA2);
+HCSR04 side_obstacle_sensor(PTD3, PTD2);
 
 DigitalOut forward_obstacle_LED(PTD0);
 DigitalOut side_obstacle_LED(PTD1);
@@ -26,7 +26,7 @@ DigitalOut side_obstacle_LED(PTD1);
 Timer off_line_timer;
 
 // enable pin duty cycle values
-const int duty_cycle_slow{20};
+const int duty_cycle_slow{15};
 const int duty_cycle_cruise{25};
 const int duty_cycle_med{50};
 const int duty_cycle_fast{60};
@@ -39,19 +39,24 @@ void obstacle_avoidance_routine(){
     // stop the rover and turn 90 degrees anticlockwise
     rover.stop();
     wait_us(500000);
-    rover.En_duty_set(duty_cycle_med, duty_cycle_med);
+    rover.rgb(1, 1, 0);
     rover.anticlockwise_90();
+    rover.rgb(1, 1, 0);
 
     bool obstacle_cleared{false};
 
     while (!obstacle_cleared){
-        /* while not past the obstacle 
-            obstacle is assumed to be cleared when the line is found again*/
+        /* 
+        while not past the obstacle 
+        obstacle is assumed to be cleared when the line is found again
+        */
         if(side_obstacle_sensor.get_distance() <= 0.4){
             // if obstacle 40cm or less from rover
+            rover.En_duty_set(duty_cycle_slow, duty_cycle_slow);
             rover.forward();
             side_obstacle_LED.write(1);
         }else{
+            rover.En_duty_set(duty_cycle_fast, duty_cycle_fast);
             rover.clockwise();
             side_obstacle_LED.write(0);
         }
@@ -60,7 +65,6 @@ void obstacle_avoidance_routine(){
             obstacle_cleared = true;
         }
     }
-
     side_obstacle_LED.write(0);
 }
 
@@ -68,14 +72,15 @@ void obstacle_avoidance_routine(){
 int main(){
     int i{1};
 
+    // wait until a clap is received to start the main line following routine
     while(!clap.clap_received()){
         rover.rgb(0, 1, 0);
+        forward_obstacle_LED.write(0);
         wait_us(500000);
         rover.rgb(1, 1, 1);
+        forward_obstacle_LED.write(1);
         wait_us(500000);
     }
-    // wait until a clap is received to start the main line following routine
-    // loop through, maybe change led colour
     
     while (true) {
         // Find the direction of the line
@@ -84,13 +89,13 @@ int main(){
         bool direction_changed{false};
 
         // measure distance to obstacle using the ultrasonic sensor
-        //float distance = forward_obstacle_sensor.get_distance();
+        float distance = forward_obstacle_sensor.get_distance();
 
         /*
         Use line and obstacle distance measurements to determine the status of the rover
 
-        Rover status changed to line_searching if a line hasn't been detected for 2 seconds
-        Rover status changed to obstacle_manouvre if an obstacle is detected within 40cm
+        Rover status changed to line_searching if a line hasn't been detected for 5 seconds
+        Rover status changed to obstacle_manouvre if an obstacle is detected within 30cm of the rover
         */
         
         if (line_direction == LineSensor::Lost){
@@ -113,13 +118,13 @@ int main(){
             rover_status = Status::normal;
         }
 
-        // if obstacle 40cm or less from rover
-        /*if (distance <= 0.4){
+        // if obstacle 30cm or less from rover
+        if (distance <= 0.3){
             rover_status = Status::obstacle_manouvre;
             forward_obstacle_LED = 1;
         }else{
             forward_obstacle_LED = 0;
-        }*/
+        }
 
         // command the rover based on the current status
         switch (rover_status){
@@ -175,7 +180,7 @@ int main(){
                 break;
             }
             case Status::error:{
-                // if the system is in an error state, stop the rover and flash the LED red
+                // if the system is in an error state, stop the rover and flash the LEDs red
                 rover.stop();
                 for (int i{0}; i<3; i++){
                     rover.rgb(0, 1, 1);

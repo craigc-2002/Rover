@@ -138,7 +138,7 @@ void Rover::anticlockwise_90(void){
     // method to turn the rover 90 degrees anticlockwise
     this->write_En_PWM(100, 100);
     this->anticlockwise();
-    wait_us(420000);
+    wait_us(450000);
     this->stop();
     wait_us(500000);
     this->resume();
@@ -148,7 +148,7 @@ void Rover::clockwise_90(void){
     // method to turn the rover 90 degrees clockwise
     this->write_En_PWM(100, 100);
     this->clockwise();
-    wait_us(420000);
+    wait_us(450000);
     this->stop();
     wait_us(500000);
     this->resume();
