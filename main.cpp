@@ -24,9 +24,10 @@ DigitalOut forward_obstacle_LED(PTD0);
 DigitalOut side_obstacle_LED(PTD1);
 
 Timer off_line_timer;
+bool lost_object{false};
 
 // enable pin duty cycle values
-const int duty_cycle_slow{15};
+const int duty_cycle_slow{20};
 const int duty_cycle_cruise{25};
 const int duty_cycle_med{50};
 const int duty_cycle_fast{60};
@@ -40,7 +41,11 @@ void obstacle_avoidance_routine(){
     rover.stop();
     wait_us(500000);
     rover.rgb(1, 1, 0);
-    rover.anticlockwise_90();
+
+    while (side_obstacle_sensor.get_distance() > 0.4){
+        rover.anticlockwise();
+    }
+    rover.stop();
     rover.rgb(1, 1, 0);
 
     bool obstacle_cleared{false};
@@ -52,13 +57,25 @@ void obstacle_avoidance_routine(){
         */
         if(side_obstacle_sensor.get_distance() <= 0.4){
             // if obstacle 40cm or less from rover
-            rover.En_duty_set(duty_cycle_slow, duty_cycle_slow);
-            rover.forward();
             side_obstacle_LED.write(1);
-        }else{
-            rover.En_duty_set(duty_cycle_fast, duty_cycle_fast);
+            rover.En_duty_set(40, 15);
             rover.clockwise();
+            lost_object = false;
+        }else{
             side_obstacle_LED.write(0);
+            rover.En_duty_set(duty_cycle_med, duty_cycle_med);
+
+            if (lost_object){
+                rover.clockwise();
+            }else{
+                rover.forward();
+                wait_us(100000);
+                rover.stop();
+                wait_us(200000);
+                rover.resume();
+            }
+
+            lost_object = true;        
         }
 
         if (line.get_direction() != LineSensor::Lost){
@@ -66,6 +83,8 @@ void obstacle_avoidance_routine(){
         }
     }
     side_obstacle_LED.write(0);
+    rover.anticlockwise();
+    wait_us(200000);
 }
 
 // ---------- Main rover control loop ----------
